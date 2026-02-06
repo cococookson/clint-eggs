@@ -43,6 +43,7 @@
     <div>
       <h1 id="msg">Loading…</h1>
       <div id="icon"></div>
+      <div id="updated" style="margin-top:6px; font-size:13px; opacity:0.8;"></div>
       <div id="soundWrap"></div>
     </div>
 
@@ -72,7 +73,7 @@
       async function load() {
         const res = await fetch("/.netlify/functions/get-status", { cache: "no-store" });
         const data = await res.json();
-
+        const updated = document.getElementById("updated");
         const msg = document.getElementById("msg");
         const icon = document.getElementById("icon");
         const soundWrap = document.getElementById("soundWrap");
@@ -82,14 +83,19 @@
           msg.textContent = "yes, clint has eggs";
           icon.textContent = "🥚🥚";
           soundWrap.innerHTML = "";
+          updated.textContent = data.updatedAt
+            ? "last updated: " + new Date(data.updatedAt).toLocaleString()
+            : "";
         } else {
           document.body.style.background = "red";
           msg.textContent = "no, clint has no eggs";
           icon.textContent = "💔🥚";
-
           soundWrap.innerHTML = `
             <button onclick="playSadBeep()">🔊 play sad egg noise</button>
           `;
+          updated.textContent = data.updatedAt
+            ? "last updated: " + new Date(data.updatedAt).toLocaleString()
+            : "";
         }
       }
 
@@ -100,4 +106,5 @@
     </script>
   </body>
 </html>
+
 
