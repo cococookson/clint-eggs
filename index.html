@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Clint Eggs Status</title>
+    <title>Clint Egg Status</title>
     <style>
       body {
         margin: 0;
@@ -13,34 +13,88 @@
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
         color: white;
         text-align: center;
+        transition: background 0.3s ease;
       }
-      h1 { font-size: clamp(2rem, 6vw, 4rem); margin: 0 1rem; }
-      p { opacity: 0.85; margin-top: 0.75rem; }
-      a { color: rgba(255,255,255,0.9); }
+      h1 {
+        font-size: clamp(2rem, 6vw, 4rem);
+        margin: 0;
+      }
+      #icon {
+        font-size: 72px;
+        margin-top: 12px;
+      }
+      #meta {
+        margin-top: 12px;
+        opacity: 0.85;
+        font-size: 14px;
+      }
+      button {
+        margin-top: 14px;
+        padding: 10px 14px;
+        border-radius: 14px;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+      }
     </style>
   </head>
+
   <body>
     <div>
       <h1 id="msg">Loading…</h1>
-      <p id="meta"></p>
+      <div id="icon"></div>
+      <div id="soundWrap"></div>
+      <div id="meta"></div>
     </div>
 
     <script>
+      function playSadBeep() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+
+        o.type = "sine";
+        o.frequency.setValueAtTime(420, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(160, ctx.currentTime + 0.4);
+
+        g.gain.setValueAtTime(0.001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+
+        o.connect(g);
+        g.connect(ctx.destination);
+
+        o.start();
+        o.stop(ctx.currentTime + 0.6);
+        o.onended = () => ctx.close();
+      }
+
       async function load() {
         const res = await fetch("/.netlify/functions/get-status", { cache: "no-store" });
         const data = await res.json();
 
+        const msg = document.getElementById("msg");
+        const icon = document.getElementById("icon");
+        const meta = document.getElementById("meta");
+        const soundWrap = document.getElementById("soundWrap");
+
         if (data.hasEggs) {
           document.body.style.background = "green";
-          document.getElementById("msg").textContent = "yes, clint has eggs";
+          msg.textContent = "yes, clint has eggs";
+          icon.textContent = "🥚";
+          soundWrap.innerHTML = "";
+          meta.textContent = "egg confidence: 97% • verified by vibes";
         } else {
           document.body.style.background = "red";
-          document.getElementById("msg").textContent = "no, clint has no eggs";
-        }
+          msg.textContent = "no, clint has no eggs";
+          icon.textContent = "💔🥚";
+          meta.textContent = "egg confidence: 12% • sample size: heartbreak";
 
-        const meta = [];
-        if (data.updatedAt) meta.push("Updated: " + new Date(data.updatedAt).toLocaleString());
-        document.getElementById("meta").textContent = meta.join(" • ");
+          soundWrap.innerHTML = `
+            <button onclick="playSadBeep()">🔊 play sad egg noise</button>
+          `;
+        }
       }
 
       load().catch(() => {
