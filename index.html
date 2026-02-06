@@ -44,7 +44,6 @@
       <h1 id="msg">Loading…</h1>
       <div id="icon"></div>
       <div id="soundWrap"></div>
-      <div id="meta"></div>
     </div>
 
     <script>
@@ -76,20 +75,17 @@
 
         const msg = document.getElementById("msg");
         const icon = document.getElementById("icon");
-        const meta = document.getElementById("meta");
         const soundWrap = document.getElementById("soundWrap");
 
         if (data.hasEggs) {
           document.body.style.background = "green";
           msg.textContent = "yes, clint has eggs";
-          icon.textContent = "🥚";
+          icon.textContent = "🥚🥚";
           soundWrap.innerHTML = "";
-          meta.textContent = "egg confidence: 97% • verified by vibes";
         } else {
           document.body.style.background = "red";
           msg.textContent = "no, clint has no eggs";
           icon.textContent = "💔🥚";
-          meta.textContent = "egg confidence: 12% • sample size: heartbreak";
 
           soundWrap.innerHTML = `
             <button onclick="playSadBeep()">🔊 play sad egg noise</button>
@@ -104,3 +100,4 @@
     </script>
   </body>
 </html>
+
